@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sephora</string>
+    <string name="action_search">Search</string>
+    <string name="text_search_books">Search Book By Title or Author\'s Name</string>
+</resources>
