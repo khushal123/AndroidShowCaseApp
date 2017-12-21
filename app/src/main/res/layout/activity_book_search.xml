@@ -23,9 +23,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="6dp"
-            android:text="@string/text_search_books"
+            android:text="@{viewmodel.emptyViewText}"
             android:textColor="@color/secondary_text"
-            android:visibility="@{viewmodel.isScreenInInitialState ? View.VISIBLE : View.GONE}" />
+            android:visibility="@{viewmodel.isSearchResultEmpty &amp;&amp; !viewmodel.isSearchInProgress ? View.VISIBLE : View.GONE}" />
 
         <ProgressBar
             android:layout_width="wrap_content"

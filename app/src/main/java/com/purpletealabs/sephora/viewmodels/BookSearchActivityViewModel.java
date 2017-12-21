@@ -1,10 +1,15 @@
 package com.purpletealabs.sephora.viewmodels;
 
-import android.arch.lifecycle.ViewModel;
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.content.Context;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 
+import com.purpletealabs.sephora.R;
 import com.purpletealabs.sephora.dataSource.BooksDataSource;
 import com.purpletealabs.sephora.dataSource.BooksRemoteDataSource;
 import com.purpletealabs.sephora.dataSource.BooksRepository;
@@ -12,17 +17,20 @@ import com.purpletealabs.sephora.dtos.Book;
 import com.purpletealabs.sephora.dtos.SearchBooksResponseModel;
 import com.purpletealabs.sephora.utils.AppExecutors;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookSearchActivityViewModel extends ViewModel implements BooksDataSource.SearchBooksCallback {
+public class BookSearchActivityViewModel extends AndroidViewModel implements BooksDataSource.SearchBooksCallback {
     public final ObservableArrayList<BookViewModel> mBooks = new ObservableArrayList<>();
 
     public final ObservableBoolean isSearchInProgress = new ObservableBoolean(false);
 
     public final ObservableBoolean isSearchResultEmpty = new ObservableBoolean(true);
 
-    public final ObservableBoolean isScreenInInitialState = new ObservableBoolean(true);
+    public final ObservableField<String> emptyViewText = new ObservableField<>();
+
+    private final WeakReference<Context> mContext;
 
     private Handler handler = new Handler();
 
@@ -33,15 +41,18 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
         }
     };
 
-    private String mSearchTerm;
+    public String mSearchTerm;
 
     private int mTotal;
 
+    public BookSearchActivityViewModel(@NonNull Application application) {
+        super(application);
+        mContext = new WeakReference<Context>(application.getApplicationContext());
+        emptyViewText.set(mContext.get().getString(R.string.text_search_books));
+    }
+
     public void searchFor(String query, boolean delayed) {
         mSearchTerm = query;
-        mBooks.clear();
-        isScreenInInitialState.set(true);
-        isSearchResultEmpty.set(mBooks.isEmpty());
         handler.removeCallbacks(mSearchStarter);
         BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
         br.cancelPendingExecutions();
@@ -51,7 +62,9 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
     }
 
     private void searchBooks() {
-        isScreenInInitialState.set(false);
+        mBooks.clear();
+        isSearchResultEmpty.set(mBooks.isEmpty());
+        emptyViewText.set(mContext.get().getString(R.string.text_search_books));
         isSearchInProgress.set(true);
         BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
         br.cancelPendingExecutions();
@@ -79,6 +92,7 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
         }
         mBooks.addAll(bookViewModels);
         isSearchResultEmpty.set(mBooks.isEmpty());
+        emptyViewText.set(mContext.get().getString(R.string.text_empty_search_result, mSearchTerm));
     }
 
     @Override

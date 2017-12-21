@@ -1,14 +1,20 @@
 package com.purpletealabs.sephora.activities;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
+import android.databinding.ObservableBoolean;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.purpletealabs.sephora.R;
 import com.purpletealabs.sephora.adapters.BooksAdapter;
@@ -29,6 +35,15 @@ public class BookSearchActivity extends AppCompatActivity {
         ActivityBookSearchBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_book_search);
 
         mViewModel = ViewModelProviders.of(this).get(BookSearchActivityViewModel.class);
+
+        mViewModel.isSearchInProgress.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                if (((ObservableBoolean) observable).get()) {
+                    hideKeyboard();
+                }
+            }
+        });
 
         binding.setViewmodel(mViewModel);
 
@@ -53,6 +68,12 @@ public class BookSearchActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem myActionMenuItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) myActionMenuItem.getActionView();
+        searchView.setIconifiedByDefault(true);
+        if (!TextUtils.isEmpty(mViewModel.mSearchTerm)) {
+            searchView.setIconified(false);
+            searchView.setQuery(mViewModel.mSearchTerm, false);
+            searchView.clearFocus();
+        }
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -76,4 +97,15 @@ public class BookSearchActivity extends AppCompatActivity {
         mViewModel.destroy();
         super.onDestroy();
     }
+
+    private void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
+    }
+
 }

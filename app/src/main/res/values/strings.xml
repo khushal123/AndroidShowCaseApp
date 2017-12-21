@@ -2,4 +2,5 @@
     <string name="app_name">Sephora</string>
     <string name="action_search">Search</string>
     <string name="text_search_books">Search Book By Title or Author\'s Name</string>
+    <string name="text_empty_search_result" formatted="false">No books found matching \'%s\'</string>
 </resources>
