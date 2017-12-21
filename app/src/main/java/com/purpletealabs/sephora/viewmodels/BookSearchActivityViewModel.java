@@ -3,17 +3,19 @@ package com.purpletealabs.sephora.viewmodels;
 import android.arch.lifecycle.ViewModel;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
-import android.os.AsyncTask;
 import android.os.Handler;
 
+import com.purpletealabs.sephora.dataSource.BooksDataSource;
+import com.purpletealabs.sephora.dataSource.BooksRemoteDataSource;
+import com.purpletealabs.sephora.dataSource.BooksRepository;
 import com.purpletealabs.sephora.dtos.Book;
 import com.purpletealabs.sephora.dtos.SearchBooksResponseModel;
-import com.purpletealabs.sephora.tasks.SearchBooksTask;
+import com.purpletealabs.sephora.utils.AppExecutors;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookSearchActivityViewModel extends ViewModel implements SearchBooksTask.Callback {
+public class BookSearchActivityViewModel extends ViewModel implements BooksDataSource.SearchBooksCallback {
     public final ObservableArrayList<BookViewModel> mBooks = new ObservableArrayList<>();
 
     public final ObservableBoolean isSearchInProgress = new ObservableBoolean(false);
@@ -33,8 +35,6 @@ public class BookSearchActivityViewModel extends ViewModel implements SearchBook
 
     private String mSearchTerm;
 
-    private SearchBooksTask mSearchTask;
-
     private int mTotal;
 
     public void searchFor(String query, boolean delayed) {
@@ -51,32 +51,32 @@ public class BookSearchActivityViewModel extends ViewModel implements SearchBook
     private void searchBooks() {
         isScreenInInitialState.set(false);
         isSearchInProgress.set(true);
-        mSearchTask = new SearchBooksTask(mSearchTerm, 0, this);
-        mSearchTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+        br.searchBooks(mSearchTerm, 0, this);
     }
 
     public void loadMore(int page) {
         if (mBooks.size() < mTotal) {
-            if (mSearchTask != null) {
-                mSearchTask.cancel(true);
-            }
-            mSearchTask = new SearchBooksTask(mSearchTerm, page, this);
-            mSearchTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+            br.searchBooks(mSearchTerm, page, this);
         }
     }
 
     @Override
-    public void onSearchResult(SearchBooksResponseModel serarchResult) {
+    public void onSearchBooksResult(SearchBooksResponseModel serarchResult) {
         isSearchInProgress.set(false);
-        if (serarchResult != null) {
-            mTotal = serarchResult.getTotalItems();
-            List<Book> bookList = serarchResult.getBooks();
-            List<BookViewModel> books = new ArrayList<>();
-            for (Book b : bookList) {
-                books.add(new BookViewModel(b));
-            }
-            mBooks.addAll(books);
-            isSearchResultEmpty.set(mBooks.isEmpty());
+        mTotal = serarchResult.getTotalItems();
+        List<Book> bookList = serarchResult.getBooks();
+        List<BookViewModel> books = new ArrayList<>();
+        for (Book b : bookList) {
+            books.add(new BookViewModel(b));
         }
+        mBooks.addAll(books);
+        isSearchResultEmpty.set(mBooks.isEmpty());
+    }
+
+    @Override
+    public void onSearchBooksFailure() {
+        isSearchInProgress.set(false);
     }
 }

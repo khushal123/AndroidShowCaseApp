@@ -51,6 +51,7 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.binding.setViewmodel(mBooks.get(position));
+        holder.binding.executePendingBindings();
     }
 
     @Override
