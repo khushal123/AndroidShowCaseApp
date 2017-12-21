@@ -28,6 +28,8 @@ public class BookSearchActivity extends AppCompatActivity {
 
     public EndlessRecyclerViewScrollListener mScrollListener;
 
+    private BooksAdapter mAdapter;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +43,7 @@ public class BookSearchActivity extends AppCompatActivity {
             public void onPropertyChanged(Observable observable, int i) {
                 if (((ObservableBoolean) observable).get()) {
                     hideKeyboard();
+                    mAdapter.notifyDataSetChanged();
                 }
             }
         });
@@ -60,7 +63,8 @@ public class BookSearchActivity extends AppCompatActivity {
             }
         };
         binding.rvBooks.addOnScrollListener(mScrollListener);
-        binding.rvBooks.setAdapter(new BooksAdapter(mViewModel.mBooks));
+        mAdapter = new BooksAdapter(mViewModel.mBooks);
+        binding.rvBooks.setAdapter(mAdapter);
     }
 
     @Override
