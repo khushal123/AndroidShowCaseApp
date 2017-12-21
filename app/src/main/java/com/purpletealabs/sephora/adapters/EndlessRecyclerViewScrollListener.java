@@ -1,4 +1,4 @@
-package com.purpletealabs.sephora.viewmodels;
+package com.purpletealabs.sephora.adapters;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,7 +8,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
     // The minimum amount of items to have below your current scroll position
     // before loading more.
-    private int visibleThreshold = 10;
+    private int mVisibleThreshold = 10;
     // The current offset index of data you have loaded
     private int currentPage = 0;
     // The total number of items in the dataset after the last load
@@ -20,9 +20,9 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
 
     private final RecyclerView.LayoutManager mLayoutManager;
 
-    protected EndlessRecyclerViewScrollListener(GridLayoutManager layoutManager) {
+    protected EndlessRecyclerViewScrollListener(GridLayoutManager layoutManager, int visibleThreshold) {
         this.mLayoutManager = layoutManager;
-        visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
+        mVisibleThreshold = visibleThreshold;
     }
 
     private int getLastVisibleItem(int[] lastVisibleItemPositions) {
@@ -76,7 +76,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         // the visibleThreshold and need to reload more data.
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
         // threshold should reflect how many total columns there are too
-        if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+        if (!loading && (lastVisibleItemPosition + mVisibleThreshold) > totalItemCount) {
             currentPage++;
             onLoadMore(currentPage);
             loading = true;

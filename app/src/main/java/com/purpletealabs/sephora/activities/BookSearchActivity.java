@@ -20,7 +20,7 @@ import com.purpletealabs.sephora.R;
 import com.purpletealabs.sephora.adapters.BooksAdapter;
 import com.purpletealabs.sephora.databinding.ActivityBookSearchBinding;
 import com.purpletealabs.sephora.viewmodels.BookSearchActivityViewModel;
-import com.purpletealabs.sephora.viewmodels.EndlessRecyclerViewScrollListener;
+import com.purpletealabs.sephora.adapters.EndlessRecyclerViewScrollListener;
 
 public class BookSearchActivity extends AppCompatActivity {
 
@@ -53,7 +53,8 @@ public class BookSearchActivity extends AppCompatActivity {
     private void initViews(ActivityBookSearchBinding binding) {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         binding.rvBooks.setLayoutManager(layoutManager);
-        mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+        int visibleThreshold = 20;
+        mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager, visibleThreshold) {
             @Override
             public void onLoadMore(int page) {
                 mViewModel.loadMore(page);
