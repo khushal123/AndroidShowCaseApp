@@ -39,6 +39,9 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
             @Override
             public void onItemRangeRemoved(ObservableList<BookViewModel> sender, int positionStart, int itemCount) {
                 notifyItemRangeRemoved(positionStart, itemCount);
+                if (mBooks.isEmpty()) {
+                    notifyDataSetChanged();
+                }
             }
         });
     }
