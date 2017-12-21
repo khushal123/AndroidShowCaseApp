@@ -7,17 +7,19 @@ import com.purpletealabs.sephora.dtos.SearchBooksResponseModel;
 public class BooksRepository implements BooksDataSource {
     private volatile static BooksRepository INSTANCE = null;
 
-    private final BooksDataSource mDataSource;
+    //Remote data source to search books in
+    private final BooksDataSource mRemoteDataSource;
 
+    //Here we can have multiple different data sources
     private BooksRepository(BooksDataSource dataSource) {
-        mDataSource = dataSource;
+        mRemoteDataSource = dataSource;
     }
 
-    public static BooksRepository getInstance(BooksDataSource dataSource) {
+    public static BooksRepository getInstance(BooksDataSource remoteDataSource) {
         if (INSTANCE == null) {
             synchronized (BooksRepository.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new BooksRepository(dataSource);
+                    INSTANCE = new BooksRepository(remoteDataSource);
                 }
             }
         }
@@ -26,7 +28,7 @@ public class BooksRepository implements BooksDataSource {
 
     @Override
     public void searchBooks(String searchTerm, int page, @NonNull final SearchBooksCallback callback) {
-        mDataSource.searchBooks(searchTerm, page, new SearchBooksCallback() {
+        mRemoteDataSource.searchBooks(searchTerm, page, new SearchBooksCallback() {
             @Override
             public void onSearchBooksResult(SearchBooksResponseModel result) {
                 callback.onSearchBooksResult(result);
@@ -41,6 +43,6 @@ public class BooksRepository implements BooksDataSource {
 
     @Override
     public void cancelPendingExecutions() {
-        mDataSource.cancelPendingExecutions();
+        mRemoteDataSource.cancelPendingExecutions();
     }
 }

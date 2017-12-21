@@ -11,6 +11,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.purpletealabs.sephora.R;
 import com.purpletealabs.sephora.dtos.Book;
 
+//This view model is bound with book item in view
 public class BookViewModel extends BaseObservable {
     private String thumbnail;
 
@@ -30,9 +31,13 @@ public class BookViewModel extends BaseObservable {
         this.rating = book.getVolumeInfo().getAverageRating();
     }
 
+
+    //Customized binding method to load image
     @BindingAdapter({"app:thumbnail"})
     public static void loadImage(SimpleDraweeView view, String imageUrl) {
         Uri uri;
+
+        //Load place holder image if thumbnail is not available
         if (TextUtils.isEmpty(imageUrl)) {
             uri = new Uri.Builder().scheme(UriUtil.LOCAL_RESOURCE_SCHEME).path(String.valueOf(R.drawable.no_image)).build();
         } else {

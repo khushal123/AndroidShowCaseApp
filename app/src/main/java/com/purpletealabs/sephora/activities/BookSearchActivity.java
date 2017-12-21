@@ -26,6 +26,7 @@ public class BookSearchActivity extends AppCompatActivity {
 
     private BookSearchActivityViewModel mViewModel;
 
+    //This scroll listener decides when to load more data
     public EndlessRecyclerViewScrollListener mScrollListener;
 
     @Override
@@ -39,8 +40,11 @@ public class BookSearchActivity extends AppCompatActivity {
         mViewModel.isSearchInProgress.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
+
+                //Hide keyboard when it starts to search and reset state of scroll listener
                 if (((ObservableBoolean) observable).get()) {
                     hideKeyboard();
+                    mScrollListener.resetState();
                 }
             }
         });
@@ -53,7 +57,10 @@ public class BookSearchActivity extends AppCompatActivity {
     private void initViews(ActivityBookSearchBinding binding) {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         binding.rvBooks.setLayoutManager(layoutManager);
+
+        //More data will be loaded once user is 20 items away from reaching last item
         int visibleThreshold = 20;
+
         mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager, visibleThreshold) {
             @Override
             public void onLoadMore(int page) {
@@ -79,14 +86,12 @@ public class BookSearchActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mViewModel.searchFor(query, false);
-                mScrollListener.resetState();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
                 mViewModel.searchFor(query, true);
-                mScrollListener.resetState();
                 return true;
             }
         });
@@ -95,6 +100,7 @@ public class BookSearchActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        //Called to cancel pending executions if any
         mViewModel.destroy();
         super.onDestroy();
     }

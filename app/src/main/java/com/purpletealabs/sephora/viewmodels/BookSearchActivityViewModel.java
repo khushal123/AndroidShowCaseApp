@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookSearchActivityViewModel extends AndroidViewModel implements BooksDataSource.SearchBooksCallback {
+
     public final ObservableArrayList<BookViewModel> mBooks = new ObservableArrayList<>();
 
+    // These observable fields will update Views automatically
     public final ObservableBoolean isSearchInProgress = new ObservableBoolean(false);
 
     public final ObservableBoolean isSearchResultEmpty = new ObservableBoolean(true);
@@ -57,11 +59,13 @@ public class BookSearchActivityViewModel extends AndroidViewModel implements Boo
         BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
         br.cancelPendingExecutions();
         if (!mSearchTerm.isEmpty()) {
+            //Trigger search if user has not typed anything in last one second or user has pressed search in keyboard
             handler.postDelayed(mSearchStarter, delayed ? 1000L : 10L);
         }
     }
 
     private void searchBooks() {
+        //Clear existing search result before starting new search
         mBooks.clear();
         isSearchResultEmpty.set(mBooks.isEmpty());
         emptyViewText.set(mContext.get().getString(R.string.text_search_books));
