@@ -70,4 +70,10 @@ public class BookSearchActivity extends AppCompatActivity {
         });
         return true;
     }
+
+    @Override
+    protected void onDestroy() {
+        mViewModel.destroy();
+        super.onDestroy();
+    }
 }

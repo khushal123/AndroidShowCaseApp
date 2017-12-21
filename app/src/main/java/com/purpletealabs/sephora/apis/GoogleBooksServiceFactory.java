@@ -3,8 +3,10 @@ package com.purpletealabs.sephora.apis;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Dispatcher;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -21,17 +23,19 @@ public class GoogleBooksServiceFactory {
     private static final String API_KEY = "AIzaSyDEv3i28ipjy9uWAwjGlVyNnsv__vxt784";
     private static final String PARAM_KEY = "key";
 
-    public static IBooksService newServiceInstance() {
+    public static IBooksService newServiceInstance(ExecutorService executorService) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
-                .client(getOkHttpClient())
+                .client(getOkHttpClient(executorService))
                 .build();
         return retrofit.create(IBooksService.class);
     }
 
-    private static OkHttpClient getOkHttpClient() {
+    private static OkHttpClient getOkHttpClient(ExecutorService executorService) {
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+        Dispatcher dispatcher = new Dispatcher(executorService);
+        httpClientBuilder.dispatcher(dispatcher);
         httpClientBuilder.connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
         httpClientBuilder.readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
         httpClientBuilder.writeTimeout(WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS);

@@ -43,6 +43,8 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
         isScreenInInitialState.set(true);
         isSearchResultEmpty.set(mBooks.isEmpty());
         handler.removeCallbacks(mSearchStarter);
+        BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+        br.cancelPendingExecutions();
         if (!mSearchTerm.isEmpty()) {
             handler.postDelayed(mSearchStarter, delayed ? 1000L : 10L);
         }
@@ -52,12 +54,14 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
         isScreenInInitialState.set(false);
         isSearchInProgress.set(true);
         BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+        br.cancelPendingExecutions();
         br.searchBooks(mSearchTerm, 0, this);
     }
 
     public void loadMore(int page) {
         if (mBooks.size() < mTotal) {
             BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+            br.cancelPendingExecutions();
             br.searchBooks(mSearchTerm, page, this);
         }
     }
@@ -66,17 +70,24 @@ public class BookSearchActivityViewModel extends ViewModel implements BooksDataS
     public void onSearchBooksResult(SearchBooksResponseModel serarchResult) {
         isSearchInProgress.set(false);
         mTotal = serarchResult.getTotalItems();
+        List<BookViewModel> bookViewModels = new ArrayList<>();
         List<Book> bookList = serarchResult.getBooks();
-        List<BookViewModel> books = new ArrayList<>();
-        for (Book b : bookList) {
-            books.add(new BookViewModel(b));
+        if (bookList != null) {
+            for (Book b : bookList) {
+                bookViewModels.add(new BookViewModel(b));
+            }
         }
-        mBooks.addAll(books);
+        mBooks.addAll(bookViewModels);
         isSearchResultEmpty.set(mBooks.isEmpty());
     }
 
     @Override
     public void onSearchBooksFailure() {
         isSearchInProgress.set(false);
+    }
+
+    public void destroy() {
+        BooksRepository br = BooksRepository.getInstance(BooksRemoteDataSource.getInstance(new AppExecutors()));
+        br.cancelPendingExecutions();
     }
 }

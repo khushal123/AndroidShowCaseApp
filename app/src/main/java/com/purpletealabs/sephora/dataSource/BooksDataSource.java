@@ -12,4 +12,6 @@ public interface BooksDataSource {
     }
 
     void searchBooks(String searchTerm, final int page, @NonNull SearchBooksCallback callback);
+
+    void cancelPendingExecutions();
 }

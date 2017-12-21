@@ -38,4 +38,9 @@ public class BooksRepository implements BooksDataSource {
             }
         });
     }
+
+    @Override
+    public void cancelPendingExecutions() {
+        mDataSource.cancelPendingExecutions();
+    }
 }
